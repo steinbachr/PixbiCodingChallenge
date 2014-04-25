@@ -1,8 +1,12 @@
 /*
 A naive web server implementation.
 */
+var net = require('net');
+var nodeServer = net.createServer(function(c) { //'connection' listener    
+  c.pipe(c);
+});
 
-module.exports = {
+module.exports = {	
 	use: function() {
 		var callback = arguments[0],
 			route = null;
@@ -12,12 +16,14 @@ module.exports = {
 			route = arguments[0];
 			callback = arguments[1];			
 		}
-	}
+	},
 
 	listen: function(port, cb) {
-		console.log("Starting connection over port " + port);
+		console.log("Starting connection over port " + port);		
 
 		/* after connection created, invoke callback */
-		cb();
+		nodeServer.listen(port, function() { 
+  			cb();
+		});		
 	}
 }
