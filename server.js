@@ -11,15 +11,19 @@ module.exports = (function() {
 	this function is used to create the chain of callbacks for routes such that when next() is called from within a request callback, 
 	the next matched routes' callback is triggered
 	*/
-	var createLinkedList = function(routes) {
+	var createLinkedList = function(routes, request, response) {		
 		for (var i = routes.length - 1 ; i >= 0 ; i--) {
 			/* if we're at the last route and next is called, throw an exception */
 			if (i === routes.length - 1) {
 				routes[i].next = function() { throw "Can't call next, no more routes match" }
 			} else {
-				routes[i].next = function() {
-					routes[i + 1].callback(request, response, routes[i + 1].next)
-				};
+				/* have to escape the closure */
+				(function() {
+					var j = i;				
+					routes[j].next = function() {
+						routes[j + 1].callback(request, response, routes[j + 1].next);
+					};
+				})();
 			}
 		}
 	}
@@ -43,10 +47,10 @@ module.exports = (function() {
 		if (matchedRoutes.length === 0) {
 			response.statusCode = 404;
 			return response;
-		} 
+		} 		
 
 		/* create a linked list from the matched routes such that next() will call the next link's callback */
-		createLinkedList(matchedRoutes);
+		createLinkedList(matchedRoutes, request, response);		
 
 		/* invoke the first matched routes' callback */
 		matchedRoutes[0].callback(request, response, matchedRoutes[0].next);
@@ -55,6 +59,7 @@ module.exports = (function() {
 		return response;
 	});
 
+	/* begin export object */
 	return {	
 		use: function() {
 			var callback = arguments[0],
