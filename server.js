@@ -1,12 +1,14 @@
 /*
-A naive web server implementation.
+The meat of the middleware implementation
 */
+
 var http = require('http');
 var urls = require('url');
 var httpServer = http.createServer();
 
 module.exports = (function() {
 	var routes = [];
+	
 	/* 
 	this function is used to create the chain of callbacks for routes such that when next() is called from within a request callback, 
 	the next matched routes' callback is triggered
@@ -17,7 +19,7 @@ module.exports = (function() {
 			if (i === routes.length - 1) {
 				routes[i].next = function() { throw "Can't call next, no more routes match" }
 			} else {
-				/* have to escape the closure */
+				/* have to escape the closure around i */
 				(function() {
 					var j = i;				
 					routes[j].next = function() {
@@ -46,6 +48,7 @@ module.exports = (function() {
 		*/
 		if (matchedRoutes.length === 0) {
 			response.statusCode = 404;
+			response.end('404');
 			return response;
 		} 		
 

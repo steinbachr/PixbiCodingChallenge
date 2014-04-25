@@ -8,6 +8,7 @@ Our middleware must implement at least these three methods:
 
   Caveat: The implementations of use() and listen() are encapsulated in server.js
 */
+
 module.exports = {
 	createServer: function() {
 		return require('./server');
